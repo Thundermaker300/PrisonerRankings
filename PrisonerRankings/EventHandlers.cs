@@ -14,7 +14,7 @@ namespace PrisonerRankings
     public class EventHandlers
     {
         private static Dictionary<Player, float> Rating = new Dictionary<Player, float> { };
-        public static readonly string EmptyRating = new string('☆', 5);
+        public const string EmptyRating = "☆☆☆☆☆";
 
         public static string GetRatingString(float rating)
         {
