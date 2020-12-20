@@ -63,6 +63,7 @@ namespace PrisonerRankings
 
         public static void SetRating(Player Ply, float Amount)
         {
+            Amount = Mathf.Clamp(Amount, 0, 5);
             if (!CanHaveRating(Ply))
             {
                 return;
