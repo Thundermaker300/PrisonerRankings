@@ -95,8 +95,19 @@ namespace PrisonerRankings
             RefreshRating(Ply);
         }
 
-        public static void AddRating(Player Ply, float Amount)
+        public static void AddRating(Player Ply, float Amount, string Action)
         {
+            if (Plugin.Singleton.Config.BountyGainHint != "none" && !string.IsNullOrEmpty(Action))
+            {
+                if (Plugin.Singleton.Config.ActionTranslations.TryGetValue(Action, out string Translation))
+                {
+                    Ply.ShowHint(Plugin.Singleton.Config.BountyGainHint.Replace("{bounty}", Amount.ToString()).Replace("{action}", Translation), 5);
+                }
+                else
+                {
+                    Ply.ShowHint(Plugin.Singleton.Config.BountyGainHint.Replace("{bounty}", Amount.ToString()).Replace("{action}", Action), 5);
+                }
+            }
             SetRating(Ply, GetRating(Ply) + Amount);
         }
 
@@ -121,7 +132,30 @@ namespace PrisonerRankings
 
             if (CanHaveRating(ev.Killer) && Plugin.Singleton.Config.ClassRatings.ContainsKey(ev.Target.Role))
             {
-                AddRating(ev.Killer, Plugin.Singleton.Config.ClassRatings[ev.Target.Role]);
+                if (!Plugin.Singleton.Config.KillTranslations.TryGetValue(ev.Target.Role, out string value))
+                {
+                    AddRating(ev.Killer, Plugin.Singleton.Config.ClassRatings[ev.Target.Role], "");
+                }
+                else
+                {
+                    AddRating(ev.Killer, Plugin.Singleton.Config.ClassRatings[ev.Target.Role], value);
+                }
+            }
+        }
+
+        public void Hurting(HurtingEventArgs ev)
+        {
+            if (Plugin.Singleton.Config.RatingProtection && ev.Target.Role == RoleType.ClassD && ev.Attacker.Team == Team.MTF)
+            {
+                ev.IsAllowed = false;
+            }
+        }
+
+        public void Handcuffing(HandcuffingEventArgs ev)
+        {
+            if (Plugin.Singleton.Config.ResetRatingOnCuff && ev.Target.Role == RoleType.ClassD)
+            {
+                SetRating(ev.Target, 0);
             }
         }
 
@@ -129,15 +163,15 @@ namespace PrisonerRankings
         {
             if (ev.Pickup.ItemId.IsWeapon())
             {
-                AddRating(ev.Player, Plugin.Singleton.Config.PickupWeapon);
+                AddRating(ev.Player, Plugin.Singleton.Config.PickupWeapon, "PickupWeapon");
             }
             else if (ev.Pickup.ItemId.IsKeycard())
             {
-                AddRating(ev.Player, Plugin.Singleton.Config.PickupKeycard);
+                AddRating(ev.Player, Plugin.Singleton.Config.PickupKeycard, "PickupKeycard");
             }
             else if (ev.Pickup.ItemId.IsScp())
             {
-                AddRating(ev.Player, Plugin.Singleton.Config.PickupScpItem);
+                AddRating(ev.Player, Plugin.Singleton.Config.PickupScpItem, "PickupScpItem");
             }
         }
     }
