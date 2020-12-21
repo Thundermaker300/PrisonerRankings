@@ -16,7 +16,7 @@ namespace PrisonerRankings
     public class EventHandlers
     {
         private static Dictionary<Player, float> Rating = new Dictionary<Player, float> { };
-        public const string EmptyRating = "<size=30>☆☆☆☆☆</size>";
+        public const string EmptyRating = "<size=25>☆☆☆☆☆</size>";
 
         public static string GetRatingString(float rating)
         {
@@ -29,7 +29,7 @@ namespace PrisonerRankings
                 retString += "⯪";
             }*/
             retString += new string('☆', emptyStarCount);
-            return $"<size=30>{retString}</size>";
+            return $"<size=25>{retString}</size>";
         }
 
         public static void RefreshRating(Player Ply, bool Clear = false)
