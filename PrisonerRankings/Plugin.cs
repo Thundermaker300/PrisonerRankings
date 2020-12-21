@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using PlayerHandler = Exiled.Events.Handlers.Player;
+
 namespace PrisonerRankings
 {
     public class Plugin : Plugin<Config>
@@ -16,11 +18,26 @@ namespace PrisonerRankings
         public override void OnEnabled()
         {
             _handler = new EventHandlers();
+
+            // Events
+            PlayerHandler.Spawning += _handler.Spawning;
+            PlayerHandler.Died += _handler.Died;
+            PlayerHandler.Handcuffing += _handler.Handcuffing;
+            PlayerHandler.Hurting += _handler.Hurting;
+            PlayerHandler.PickingUpItem += _handler.PickingUpItem;
+
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
+            // Events
+            PlayerHandler.Spawning -= _handler.Spawning;
+            PlayerHandler.Died -= _handler.Died;
+            PlayerHandler.Handcuffing -= _handler.Handcuffing;
+            PlayerHandler.Hurting -= _handler.Hurting;
+            PlayerHandler.PickingUpItem -= _handler.PickingUpItem;
+
             _handler = null;
             base.OnDisabled();
         }

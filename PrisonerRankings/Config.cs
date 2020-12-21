@@ -20,8 +20,8 @@ namespace PrisonerRankings
         public bool ResetRatingOnCuff { get; set; } = true;
         [Description("Determines whether or not stars will be displayed above a player's name representing their rating.")]
         public bool DisplayOnCharacter { get; set; } = true;
-        [Description("Determines the hint to show upon gaining bounty. Set to none to disable.")]
-        public string BountyGainHint { get; set; } = "You have gained {amount} bounty by {action}.";
+        [Description("Determines the hint to show upon gaining rating. Set to none to disable.")]
+        public string RatingGainHint { get; set; } = "You have gained {amount} rating by {action}.";
         [Description("The message to show to all alive MTF when a player reaches a 3-star rating. Set to none to disable.")]
         public string ThreeRatingBroadcast { get; set; } = "{name} has reached a 3-star rating!";
         [Description("The message to show to all alive MTF when a player reaches a 5-star rating. Set to none to disable.")]

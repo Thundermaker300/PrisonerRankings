@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 using Exiled.API.Features;
 using Exiled.API.Extensions;
 using Exiled.Events.EventArgs;
+using Exiled.API.Enums;
 using UnityEngine;
+using MEC;
 
 namespace PrisonerRankings
 {
     public class EventHandlers
     {
         private static Dictionary<Player, float> Rating = new Dictionary<Player, float> { };
-        public const string EmptyRating = "☆☆☆☆☆";
+        public const string EmptyRating = "<size=30>☆☆☆☆☆</size>";
 
         public static string GetRatingString(float rating)
         {
@@ -24,16 +26,21 @@ namespace PrisonerRankings
             if (rating - fullStarCount >= 0.5)
             {
                 emptyStarCount--;
-                retString += "⯪";
+                retString += "[HALF]";
             }
             retString += new string('☆', emptyStarCount);
-            return retString;
+            return $"<size=30>{retString}</size>";
         }
 
         public static void RefreshRating(Player Ply, bool Clear = false)
         {
             if (Plugin.Singleton.Config.DisplayOnCharacter == false) return;
-            if (Clear)
+            if (!CanHaveRating(Ply))
+            {
+                Ply.CustomPlayerInfo = string.Empty;
+                return;
+            };
+            if (Clear || !Rating.ContainsKey(Ply))
             {
                 if (Rating.ContainsKey(Ply))
                 {
@@ -43,18 +50,13 @@ namespace PrisonerRankings
             }
             else
             {
-                if (!Rating.ContainsKey(Ply))
-                {
-                    Ply.CustomPlayerInfo = EmptyRating;
-                    return;
-                }
                 Ply.CustomPlayerInfo = GetRatingString(Rating[Ply]);
             }
         }
-
+       
         public static float GetRating(Player Ply)
         {
-            if (!Rating.ContainsKey(Ply))
+            if (!CanHaveRating(Ply) || !Rating.ContainsKey(Ply))
             {
                 return 0f;
             }
@@ -64,27 +66,30 @@ namespace PrisonerRankings
         public static void SetRating(Player Ply, float Amount)
         {
             Amount = Mathf.Clamp(Amount, 0, 5);
+            float PreviousAmount;
             if (!CanHaveRating(Ply))
             {
                 return;
             }
             if (!Rating.ContainsKey(Ply))
             {
+                PreviousAmount = 0f;
                 Rating.Add(Ply, Amount);
             }
             else
             {
+                PreviousAmount = Rating[Ply];
                 Rating[Ply] = Amount;
             }
             // Announcements
-            if (Amount == 5 && Plugin.Singleton.Config.FiveRatingBroadcast != "none")
+            if (Amount == 5 && PreviousAmount < 5 && Plugin.Singleton.Config.FiveRatingBroadcast != "none")
             {
                 foreach (Player NtfPly in Player.Get(Team.MTF))
                 {
                     NtfPly.Broadcast(5, Plugin.Singleton.Config.FiveRatingBroadcast.Replace("{name}", Ply.Nickname));
                 }
             }
-            if (Amount >= 3 && Plugin.Singleton.Config.ThreeRatingBroadcast != "none")
+            if (Amount >= 3 && PreviousAmount < 3 && Plugin.Singleton.Config.ThreeRatingBroadcast != "none")
             {
                 foreach (Player NtfPly in Player.Get(Team.MTF))
                 {
@@ -97,15 +102,15 @@ namespace PrisonerRankings
 
         public static void AddRating(Player Ply, float Amount, string Action)
         {
-            if (Plugin.Singleton.Config.BountyGainHint != "none" && !string.IsNullOrEmpty(Action))
+            if (Plugin.Singleton.Config.RatingGainHint != "none" && !string.IsNullOrEmpty(Action))
             {
                 if (Plugin.Singleton.Config.ActionTranslations.TryGetValue(Action, out string Translation))
                 {
-                    Ply.ShowHint(Plugin.Singleton.Config.BountyGainHint.Replace("{bounty}", Amount.ToString()).Replace("{action}", Translation), 5);
+                    Ply.ShowHint(Plugin.Singleton.Config.RatingGainHint.Replace("{bounty}", Amount.ToString()).Replace("{action}", Translation), 5);
                 }
                 else
                 {
-                    Ply.ShowHint(Plugin.Singleton.Config.BountyGainHint.Replace("{bounty}", Amount.ToString()).Replace("{action}", Action), 5);
+                    Ply.ShowHint(Plugin.Singleton.Config.RatingGainHint.Replace("{bounty}", Amount.ToString()).Replace("{action}", Action), 5);
                 }
             }
             SetRating(Ply, GetRating(Ply) + Amount);
@@ -115,9 +120,12 @@ namespace PrisonerRankings
             => Ply.Role == RoleType.ClassD || (Ply.Role == RoleType.ChaosInsurgency && Plugin.Singleton.Config.EnableForChaos);
 
         // Events
-        public void ChangingRole(ChangingRoleEventArgs ev)
+        public void Spawning(SpawningEventArgs ev)
         {
-            RefreshRating(ev.Player, true);
+            Timing.CallDelayed(0.3f, () =>
+            {
+                RefreshRating(ev.Player, true);
+            });
         }
 
         public void Died(DiedEventArgs ev)
@@ -143,19 +151,19 @@ namespace PrisonerRankings
             }
         }
 
-        public void Hurting(HurtingEventArgs ev)
-        {
-            if (Plugin.Singleton.Config.RatingProtection && ev.Target.Role == RoleType.ClassD && ev.Attacker.Team == Team.MTF)
-            {
-                ev.IsAllowed = false;
-            }
-        }
-
         public void Handcuffing(HandcuffingEventArgs ev)
         {
             if (Plugin.Singleton.Config.ResetRatingOnCuff && ev.Target.Role == RoleType.ClassD)
             {
                 SetRating(ev.Target, 0);
+            }
+        }
+
+        public void Hurting(HurtingEventArgs ev)
+        {
+            if (Plugin.Singleton.Config.RatingProtection && ev.Target.Role == RoleType.ClassD && ev.Attacker.Team == Team.MTF)
+            {
+                ev.IsAllowed = false;
             }
         }
 

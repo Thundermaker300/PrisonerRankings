@@ -42,6 +42,10 @@
     <Reference Include="Assembly-CSharp-publicized">
       <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-publicized.dll</HintPath>
     </Reference>
+    <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(EXILED_REFERENCES)\CommandSystem.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Exiled.API, Version=2.1.19.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\EXILED.2.1.19\lib\net472\Exiled.API.dll</HintPath>
     </Reference>
@@ -80,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Rating.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Plugin.cs" />
