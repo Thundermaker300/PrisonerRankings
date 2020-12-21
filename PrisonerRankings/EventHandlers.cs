@@ -23,11 +23,11 @@ namespace PrisonerRankings
             int fullStarCount = (int)Mathf.Floor(rating);
             int emptyStarCount = 5 - fullStarCount;
             string retString = new string('★', fullStarCount);
-            if (rating - fullStarCount >= 0.5)
+            /*if (rating - fullStarCount >= 0.5)
             {
                 emptyStarCount--;
-                retString += "[HALF]";
-            }
+                retString += "⯪";
+            }*/
             retString += new string('☆', emptyStarCount);
             return $"<size=30>{retString}</size>";
         }
