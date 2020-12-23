@@ -32,8 +32,6 @@ namespace PrisonerRankings
         public float PickupKeycard { get; set; } = 0.2f;
         public float PickupWeapon { get; set; } = 1f;
         public float PickupScpItem { get; set; } = 0.2f;
-        public float EnterHcz { get; set; } = 1f;
-        public float EnterEz { get; set; } = 1f;
         [Description("Determines the amount of rating that is gained for killing users of certain classes. Add/remove classes to the list to include them (eg. SCPs).")]
         public Dictionary<RoleType, float> ClassRatings { get; set; } = new Dictionary<RoleType, float>
         {
